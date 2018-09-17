@@ -1,0 +1,125 @@
+[
+  {
+    "nodeType": 9,
+    "childNodeIndexes": [
+      1,
+      14
+    ]
+  },
+  {
+    "nodeType": 10,
+    "nodeName": "html"
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n  "
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "LINK",
+    "attributes": [
+      {
+        "name": "rel",
+        "value": "stylesheet"
+      },
+      {
+        "name": "href",
+        "value": "imported2.css"
+      }
+    ],
+    "childNodeIndexes": []
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n"
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "HEAD",
+    "attributes": [],
+    "childNodeIndexes": [
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n"
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n  "
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "hello there"
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "DIV",
+    "attributes": [
+      {
+        "name": "class",
+        "value": "imported2"
+      }
+    ],
+    "childNodeIndexes": [
+      8
+    ]
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n  "
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "IFRAME",
+    "attributes": [
+      {
+        "name": "src",
+        "value": "iframe.html"
+      },
+      {
+        "name": "frameborder",
+        "value": "0"
+      },
+      {
+        "name": "style",
+        "value": "border: 1px solid orange"
+      }
+    ],
+    "childNodeIndexes": []
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n\n"
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "BODY",
+    "attributes": [],
+    "childNodeIndexes": [
+      7,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "HTML",
+    "attributes": [
+      {
+        "name": "lang",
+        "value": "en"
+      }
+    ],
+    "childNodeIndexes": [
+      5,
+      6,
+      13
+    ]
+  }
+]

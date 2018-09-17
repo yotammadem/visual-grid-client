@@ -1,0 +1,95 @@
+[
+  {
+    "nodeType": 9,
+    "childNodeIndexes": [
+      1,
+      12
+    ]
+  },
+  {
+    "nodeType": 10,
+    "nodeName": "html"
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n"
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "HEAD",
+    "attributes": [],
+    "childNodeIndexes": [
+      2
+    ]
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n"
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n  "
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "I'm a frame"
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "DIV",
+    "attributes": [],
+    "childNodeIndexes": [
+      6
+    ]
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n  "
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "IMG",
+    "attributes": [
+      {
+        "name": "src",
+        "value": "smurfs.jpg"
+      },
+      {
+        "name": "alt",
+        "value": ""
+      }
+    ],
+    "childNodeIndexes": []
+  },
+  {
+    "nodeType": 3,
+    "nodeValue": "\n\n"
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "BODY",
+    "attributes": [],
+    "childNodeIndexes": [
+      5,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "nodeType": 1,
+    "nodeName": "HTML",
+    "attributes": [
+      {
+        "name": "lang",
+        "value": "en"
+      }
+    ],
+    "childNodeIndexes": [
+      3,
+      4,
+      11
+    ]
+  }
+]
