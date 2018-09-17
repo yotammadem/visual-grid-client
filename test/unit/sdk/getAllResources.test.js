@@ -263,6 +263,22 @@ describe('getAllResources', () => {
     }
   });
 
+  it('handles frames as resources', async () => {
+    const server = await testServer();
+    closeServer = server.close;
+
+    const baseUrl = `http://localhost:${server.port}`;
+    const iframeUrl = 'http://url/to/iframe.html';
+    const iframeContent = new RGridDom();
+    const cdt = iframeContent._getContentAsCdt();
+
+    const preResources = {
+      [iframeUrl]: {url: iframeUrl, type: 'application/x-applitools-cdt', content: cdt},
+    };
+
+    const resources = await getAllResources([], preResources);
+  });
+
   it('gets resources from prefilled resources', async () => {
     const server = await testServer();
     closeServer = server.close;

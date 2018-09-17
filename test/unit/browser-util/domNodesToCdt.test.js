@@ -61,4 +61,23 @@ describe('domNodesToCdt', () => {
     const expectedCdt = loadJsonFixture('test.orig.cdt.json');
     expect(cdt).to.deep.equal(expectedCdt);
   });
+
+  it.only('works for testIframe.html', () => {
+    const docNode = getDocNode(loadFixture('testIframe.html'));
+    const cdt = domNodesToCdt(docNode);
+    const iframeDocNode = getDocNode(loadFixture('iframe.html'));
+    const iframeCdt = domNodesToCdt(iframeDocNode);
+    _fs.writeFileSync(
+      _r(__dirname, '../../fixtures/testIframe.cdt.json'),
+      JSON.stringify(cdt, null, 2),
+    );
+    _fs.writeFileSync(
+      _r(__dirname, '../../fixtures/iframe.cdt.json'),
+      JSON.stringify(iframeCdt, null, 2),
+    );
+    const expectedCdt = loadJsonFixture('testIframe.cdt.json');
+    const expectedCdt2 = loadJsonFixture('iframe.cdt.json');
+    expect(cdt).to.deep.equal(expectedCdt);
+    expect(iframeCdt).to.deep.equal(expectedCdt2);
+  });
 });

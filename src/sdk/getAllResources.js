@@ -1,6 +1,6 @@
 'use strict';
 const mapValues = require('lodash.mapvalues');
-const {RGridResource} = require('@applitools/eyes.sdk.core');
+const {RGridResource, RGridDom} = require('@applitools/eyes.sdk.core');
 const {URL} = require('url');
 const isCss = require('./isCss');
 const toCacheEntry = require('./toCacheEntry');
@@ -60,8 +60,26 @@ function makeGetAllResources({resourceCache, fetchResource, extractCssResources,
 
   return getOrFetchResources;
 
-  async function getOrFetchResources(resourceUrls = [], preResources = {}) {
+  async function getOrFetchResources(resourceUrls = [], preResources = {}, frames = {}) {
     const resources = {};
+
+    for (const url in preResources) {
+      const preResource = preResources[url];
+      if (preResource.type === 'x-applitools-html/cdt') {
+        const frame = frames[url];
+        const rGridDom = new RGridDom();
+        rGridDom.setDomNodes(frame.cdt);
+
+        const frameResources = await getOrFetchResources(
+          frame.resourceUrls,
+          frame.resourceContents,
+          frames,
+        );
+
+        rGridDom.setResources(frameResources);
+        preResource.content = rGridDom._getContentAsCdt();
+      }
+    }
 
     for (const url in preResources) {
       resourceCache.setValue(url, toCacheEntry(fromFetchedToRGridResource(preResources[url])));

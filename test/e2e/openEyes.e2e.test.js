@@ -73,6 +73,56 @@ describe('openEyes', () => {
     await close();
   });
 
+  it.only('passes with correct screenshot (iframe)', async () => {
+    const {checkWindow, close} = await openEyes({
+      appName: 'some app',
+      testName: 'passes with correct screenshot',
+      apiKey,
+      browser: [
+        {width: 640, height: 480, name: 'chrome'},
+        {width: 800, height: 600, name: 'firefox'},
+      ],
+      showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+      saveDebugData: process.env.APPLITOOLS_SAVE_DEBUG_DATA,
+    });
+
+    const frameUrl = `${baseUrl}/iframe.html`;
+    const jpgUrl = `${baseUrl}/smurfs.jpg`;
+    const resourceUrls = ['imported2.css'];
+    const cdt = loadJsonFixture('testIframe.cdt.json');
+    const domNodes = loadJsonFixture('iframe.cdt.json');
+    const resourceContents = {
+      [frameUrl]: {
+        url: frameUrl,
+        type: 'x-applitools-html/cdt',
+      },
+    };
+
+    const frames = {
+      [frameUrl]: {
+        cdt: domNodes,
+        resourceUrls: [],
+        resourceContents: {
+          [jpgUrl]: {
+            url: jpgUrl,
+            type: 'image/jpg',
+            content: loadFixtureBuffer('smurfs.jpg'),
+          },
+        },
+      },
+    };
+
+    await checkWindow({
+      resourceUrls,
+      resourceContents,
+      cdt,
+      frames,
+      tag: 'first',
+      url: `${baseUrl}/testIframe.html`,
+    });
+    await close();
+  });
+
   it('fails with incorrect screenshot', async () => {
     const {checkWindow, close} = await openEyes({
       appName: 'some app',

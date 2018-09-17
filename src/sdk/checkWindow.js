@@ -30,6 +30,7 @@ function makeCheckWindow({
     resourceContents = {},
     url,
     cdt,
+    frames,
     tag,
     sizeMode = 'full-page',
     selector,
@@ -48,7 +49,7 @@ function makeCheckWindow({
       ({url: resourceUrl, type, value}) => ({url: absolutizeUrl(resourceUrl, url), type, value}),
     );
 
-    const getResourcesPromise = getAllResources(absoluteUrls, absoluteResourceContents);
+    const getResourcesPromise = getAllResources(absoluteUrls, absoluteResourceContents, frames);
     const renderPromise = presult(startRender());
 
     let renderJobs; // This will be an array of `resolve` functions to rendering jobs. See `createRenderJob` below.
