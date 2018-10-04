@@ -7,12 +7,6 @@ const {promisify: p} = require('util');
 const psetTimeout = p(setTimeout);
 
 describe('putResources', () => {
-  let putResources;
-
-  beforeEach(() => {
-    putResources = makePutResources();
-  });
-
   function getKey(resource) {
     return `${resource.getUrl() || 'dom'}_${resource.getSha256Hash()}`;
   }
@@ -74,17 +68,17 @@ describe('putResources', () => {
 
     const putCountPerResource = {};
 
-    const wrapper = {
-      async putResource(runningRender, resource) {
+    const putResources = makePutResources({
+      async sendPutResource(runningRender, resource) {
         const key = getKey(resource);
         putCountPerResource[key] = putCountPerResource[key] ? putCountPerResource[key] + 1 : 1;
         await psetTimeout(0);
         return `${runningRender.getRenderId()}_${key}`;
       },
-    };
+    });
 
-    const p1 = putResources(dom1, runningRender1, wrapper);
-    const p2 = putResources(dom2, runningRender2, wrapper);
+    const p1 = putResources(dom1, runningRender1);
+    const p2 = putResources(dom2, runningRender2);
 
     const result1 = await p1;
     const result2 = await p2;

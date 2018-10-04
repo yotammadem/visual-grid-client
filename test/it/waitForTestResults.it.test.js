@@ -45,6 +45,7 @@ describe('waitForTestResults', () => {
     const {openEyes, waitForTestResults} = makeRenderingGridClient({
       showLogs: process.env.APPLITOOLS_SHOW_LOGS,
       apiKey,
+      wrapper,
     });
 
     const {checkWindow, close} = await openEyes({

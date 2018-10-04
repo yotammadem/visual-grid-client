@@ -40,7 +40,7 @@ describe('openEyes', () => {
 
     wrapper = createFakeWrapper(baseUrl);
 
-    openEyes = makeRenderingGridClient({showLogs: APPLITOOLS_SHOW_LOGS}).openEyes;
+    openEyes = makeRenderingGridClient({showLogs: APPLITOOLS_SHOW_LOGS, wrapper, apiKey}).openEyes;
 
     nock(wrapper.baseUrl)
       .persist()
@@ -57,7 +57,6 @@ describe('openEyes', () => {
   it("doesn't throw exception", async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     checkWindow({cdt: [], tag: 'good1', url: `${baseUrl}/test.html`});
@@ -67,7 +66,6 @@ describe('openEyes', () => {
   it('throws with bad tag', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
     checkWindow({cdt: [], resourceUrls: [], tag: 'bad!', url: `${baseUrl}/test.html`});
     await psetTimeout(0); // because FakeEyesWrapper throws, and then the error is set async and will be read in the next call to close()
@@ -79,7 +77,6 @@ describe('openEyes', () => {
   it('passes with correct dom', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     const resourceUrls = wrapper.goodResourceUrls;
@@ -92,7 +89,6 @@ describe('openEyes', () => {
   it('fails with incorrect dom', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
     const resourceUrls = ['smurfs.jpg', 'test.css'];
     const cdt = loadJsonFixture('test.cdt.json');
@@ -111,7 +107,6 @@ describe('openEyes', () => {
         createFakeWrapper(baseUrl),
       ],
       browser: [{width: 320, height: 480}, {width: 640, height: 768}, {width: 1600, height: 900}],
-      apiKey,
     });
 
     const resourceUrls = wrapper.goodResourceUrls;
@@ -127,7 +122,6 @@ describe('openEyes', () => {
     const batchId = `some batch ID ${Date.now()}`;
     await openEyes({
       wrappers: [wrapper],
-      apiKey,
       batchName,
       batchId,
     });
@@ -140,7 +134,6 @@ describe('openEyes', () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
       browser: {width: 320, height: 480},
-      apiKey,
     });
 
     const resourceUrls = wrapper.goodResourceUrls;
@@ -184,7 +177,6 @@ describe('openEyes', () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper1, wrapper2],
       browser: [{width: 320, height: 480}, {width: 640, height: 768}],
-      apiKey,
     });
 
     const resourceUrls = wrapper.goodResourceUrls;
@@ -198,7 +190,6 @@ describe('openEyes', () => {
   it('handles resourceContents in checkWindow', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     const blobUrl = `blob.css`;
@@ -219,7 +210,6 @@ describe('openEyes', () => {
   it('handles "selector" sizeMode', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     checkWindow({cdt: [], url: 'some url', selector: 'some selector'});
@@ -229,7 +219,6 @@ describe('openEyes', () => {
   it('handles "region" sizeMode', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     checkWindow({cdt: [], url: 'some url', region: {width: 1, height: 2, left: 3, top: 4}});
@@ -241,7 +230,6 @@ describe('openEyes', () => {
       wrappers: [wrapper],
       browser: {width: 320, height: 480, name: 'ucbrowser'},
       url: `${baseUrl}/test.html`,
-      apiKey,
     });
 
     const resourceUrls = wrapper.goodResourceUrls;
@@ -263,14 +251,17 @@ describe('openEyes', () => {
       throw new Error('getRenderInfo');
     };
 
-    openEyes = makeRenderingGridClient({showLogs: process.env.APPLITOOLS_SHOW_LOGS}).openEyes;
+    openEyes = makeRenderingGridClient({
+      showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+      wrapper,
+      apiKey,
+    }).openEyes;
 
     await psetTimeout(50);
 
     const [error] = await presult(
       openEyes({
         wrappers: [wrapper],
-        apiKey,
       }),
     );
     expect(error.message).to.equal('getRenderInfo');
@@ -284,51 +275,60 @@ describe('openEyes', () => {
       throw err;
     };
 
-    openEyes = makeRenderingGridClient({showLogs: process.env.APPLITOOLS_SHOW_LOGS}).openEyes;
+    openEyes = makeRenderingGridClient({
+      showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+      wrapper,
+      apiKey,
+    }).openEyes;
 
     await psetTimeout(50);
 
     const [error] = await presult(
       openEyes({
         wrappers: [wrapper],
-        apiKey,
       }),
     );
     expect(error.message).to.equal(authorizationErrMsg);
   });
 
   it('handles error during rendering', async () => {
-    let error;
     wrapper.renderBatch = async () => {
       throw new Error('renderBatch');
     };
+    openEyes = makeRenderingGridClient({
+      showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+      wrapper,
+      apiKey,
+    }).openEyes;
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
       url: `bla`,
-      apiKey,
     });
 
     checkWindow({resourceUrls: [], cdt: [], url: `bla`});
     await psetTimeout(0);
     checkWindow({resourceUrls: [], cdt: [], url: `bla`});
-    error = await close().then(x => x, err => err);
+    const error = await close().then(x => x, err => err);
     expect(error.message).to.equal('renderBatch');
   });
 
   it('handles error during checkWindow', async () => {
-    let error;
     wrapper.checkWindow = async () => {
       throw new Error('checkWindow');
     };
+    openEyes = makeRenderingGridClient({
+      showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+      wrapper,
+      apiKey,
+    }).openEyes;
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     checkWindow({resourceUrls: [], cdt: [], url: `bla`});
     await psetTimeout(0);
     checkWindow({resourceUrls: [], cdt: [], url: `bla`});
-    error = await close().then(x => x, err => err);
+    const error = await close().then(x => x, err => err);
     expect(error.message).to.equal('checkWindow');
   });
 
@@ -340,7 +340,6 @@ describe('openEyes', () => {
     };
     const {close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     error = await close().then(x => x, err => err);
@@ -360,11 +359,13 @@ describe('openEyes', () => {
     openEyes = makeRenderingGridClient({
       concurrency: 2,
       showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+      wrapper,
+      apiKey,
     }).openEyes;
 
-    const {close} = await openEyes({wrappers: [wrapper1], apiKey});
-    await openEyes({wrappers: [wrapper2], apiKey});
-    openEyes({wrappers: [wrapper3], apiKey});
+    const {close} = await openEyes({wrappers: [wrapper1]});
+    await openEyes({wrappers: [wrapper2]});
+    openEyes({wrappers: [wrapper3]});
     expect(flag).to.equal(undefined);
     await close();
     expect(flag).to.equal(true);
@@ -379,13 +380,15 @@ describe('openEyes', () => {
     openEyes = makeRenderingGridClient({
       concurrency: 1,
       showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+      wrapper,
+      apiKey,
     }).openEyes;
 
-    const {close} = await openEyes({wrappers: [wrapper], apiKey});
+    const {close} = await openEyes({wrappers: [wrapper]});
     const err1 = await close().then(x => x, err => err);
     expect(err1.message).to.equal('close');
     const {close: close2} = await Promise.race([
-      openEyes({wrappers: [wrapper], apiKey}),
+      openEyes({wrappers: [wrapper]}),
       psetTimeout(100).then(() => ({close: 'not resolved'})),
     ]);
     expect(close2).not.to.equal('not resolved');
@@ -393,48 +396,53 @@ describe('openEyes', () => {
     expect(err2.message).to.equal('close');
   });
 
-  describe('max concurrency for render', () => {
-    beforeEach(() => {
-      openEyes = makeRenderingGridClient({
-        concurrency: 2,
-        renderConcurrencyFactor: 1,
-        showLogs: process.env.APPLITOOLS_SHOW_LOGS,
-      }).openEyes;
-    });
-
+  describe.only('max concurrency for render', () => {
     let counter;
     let finishRenders;
     beforeEach(() => {
       counter = 0;
       finishRenders = [];
-      wrapper.getRenderStatus = () =>
+      wrapper.getRenderStatus = renderIds =>
         new Promise(resolve => {
-          counter++;
+          counter += renderIds.length;
           finishRenders.push(() =>
-            resolve([
-              RenderStatusResults.fromObject({
-                status: RenderStatus.RENDERED,
-                imageLocation: JSON.stringify({isGood: true}),
-              }),
-            ]),
+            resolve(
+              renderIds.map(() =>
+                RenderStatusResults.fromObject({
+                  status: RenderStatus.RENDERED,
+                  imageLocation: JSON.stringify({isGood: true, counter}),
+                }),
+              ),
+            ),
           );
         });
     });
 
-    it('runs renders with max concurrency', async () => {
-      const {checkWindow, close} = await openEyes({wrappers: [wrapper], apiKey});
+    beforeEach(() => {
+      openEyes = makeRenderingGridClient({
+        concurrency: 2,
+        renderConcurrencyFactor: 1,
+        renderStatusInterval: 50,
+        showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+        wrapper,
+        apiKey,
+      }).openEyes;
+    });
+
+    it.only('runs renders with max concurrency', async () => {
+      const {checkWindow, close} = await openEyes({wrappers: [wrapper]});
       checkWindow({url: '', cdt: [], sizeMode: null});
       await psetTimeout(0);
       checkWindow({url: '', cdt: [], sizeMode: null});
       await psetTimeout(0);
       checkWindow({url: '', cdt: [], sizeMode: null});
-      await psetTimeout(0);
+      await psetTimeout(1000);
+      console.log('after');
       const expected1 = counter;
       finishRenders[0]();
-      await psetTimeout(0);
+      await psetTimeout(100);
       const expected2 = counter;
       finishRenders[1]();
-      finishRenders[2]();
       await close();
       expect(expected1).to.equal(2);
       expect(expected2).to.equal(3);
@@ -445,7 +453,6 @@ describe('openEyes', () => {
       const {checkWindow, close} = await openEyes({
         wrappers: [wrapper, wrapper],
         browser: [{width: 1, height: 1}, {width: 2, height: 2}],
-        apiKey,
       });
 
       checkWindow({url: '', cdt: [], sizeMode: null});
@@ -468,12 +475,10 @@ describe('openEyes', () => {
     it('runs renders with max concurrency between open/close', async () => {
       const {checkWindow, close} = await openEyes({
         wrappers: [wrapper],
-        apiKey,
       });
 
       const {checkWindow: checkWindow2, close: close2} = await openEyes({
         wrappers: [wrapper],
-        apiKey,
       });
 
       checkWindow({url: '', cdt: [], sizeMode: null});
@@ -517,11 +522,12 @@ describe('openEyes', () => {
       showLogs: process.env.APPLITOOLS_SHOW_LOGS,
       renderStatusTimeout: 50,
       renderStatusInterval: 50,
+      wrapper,
+      apiKey,
     }).openEyes;
 
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     checkWindow({resourceUrls: [], cdt: [], url: 'bla', tag: 'good1'});
@@ -544,11 +550,12 @@ describe('openEyes', () => {
       showLogs: process.env.APPLITOOLS_SHOW_LOGS,
       renderStatusTimeout: 150,
       renderStatusInterval: 50,
+      wrapper,
+      apiKey,
     }).openEyes;
 
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     checkWindow({resourceUrls: [], cdt: [], url: 'bla', tag: 'good1'});
@@ -563,7 +570,6 @@ describe('openEyes', () => {
     openEyes({
       wrappers: [wrapper],
       url: 'bla',
-      apiKey,
       baselineBranchName: 'baselineBranchName',
       baselineEnvName: 'baselineEnvName',
       baselineName: 'baselineName',
@@ -579,7 +585,6 @@ describe('openEyes', () => {
       saveNewTests: 'saveNewTests',
       compareWithParentBranch: 'compareWithParentBranch',
       ignoreBaseline: 'ignoreBaseline',
-      serverUrl: 'serverUrl',
     });
 
     expect(wrapper.baselineBranchName).to.equal('baselineBranchName');
@@ -624,7 +629,6 @@ describe('openEyes', () => {
   it('handles ignore regions', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
     const region = {left: 1, top: 2, width: 3, height: 4};
     checkWindow({
@@ -643,7 +647,6 @@ describe('openEyes', () => {
   it('handles ignore regions with selector', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     const ignoreSelector1 = {selector: 'sel1'};
@@ -681,7 +684,6 @@ describe('openEyes', () => {
   it('handles ignore regions with selector, when sizeMode===selector', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
     const selector = 'sel1';
     const ignoreRegion = {left: 1, top: 2, width: 3, height: 4};
@@ -714,7 +716,6 @@ describe('openEyes', () => {
   it('handles ignore regions with selector and floating regions with selector, when sizeMode===selector', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
     const selector = 'sel1';
     const ignoreRegion = {left: 1, top: 2, width: 3, height: 4};
@@ -795,7 +796,6 @@ describe('openEyes', () => {
     const {abort} = await openEyes({
       wrappers: [wrapper1, wrapper2],
       browser: [{width: 1, height: 2}, {width: 3, height: 4}],
-      apiKey,
     });
 
     await abort();
@@ -808,7 +808,6 @@ describe('openEyes', () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
       browser: {deviceName, screenOrientation: 'bla'},
-      apiKey,
     });
 
     checkWindow({url: '', cdt: []});
@@ -829,9 +828,9 @@ describe('openEyes', () => {
       return 'kuku';
     };
 
-    const p = openEyes({apiKey, wrappers: [wrapper]});
+    const p = openEyes({wrappers: [wrapper]});
     await psetTimeout(0);
-    await openEyes({apiKey, wrappers: [wrapper2]});
+    await openEyes({wrappers: [wrapper2]});
     expect(flag).to.equal(true);
     expect(wrapper2.renderingInfo).to.equal('bla');
     await p;

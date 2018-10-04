@@ -22,51 +22,56 @@ function validateAndAddProperties(wrapper, properties) {
   }
 }
 
-function configureWrappers({
-  wrappers,
-  isDisabled,
-  batchName,
-  batchId,
-  properties,
-  baselineBranchName,
-  baselineEnvName,
-  baselineName,
-  envName,
-  ignoreCaret,
-  matchLevel,
-  matchTimeout,
-  parentBranchName,
-  branchName,
-  proxy,
-  saveFailedTests,
-  saveNewTests,
-  compareWithParentBranch,
-  ignoreBaseline,
-  serverUrl,
-}) {
-  const batchInfo = new BatchInfo(batchName, null, batchId);
+function configureWrappers(wrappers, config) {
+  const batchInfo = new BatchInfo(config.batchName, null, config.batchId);
   for (const wrapper of wrappers) {
-    validateAndAddProperties(wrapper, properties);
-    wrapper.setBatch(batchInfo);
-
-    baselineBranchName !== undefined && wrapper.setBaselineBranchName(baselineBranchName);
-    baselineEnvName !== undefined && wrapper.setBaselineEnvName(baselineEnvName);
-    baselineName !== undefined && wrapper.setBaselineName(baselineName);
-    envName !== undefined && wrapper.setEnvName(envName);
-    ignoreCaret !== undefined && wrapper.setIgnoreCaret(ignoreCaret);
-    isDisabled !== undefined && wrapper.setIsDisabled(isDisabled);
-    matchLevel !== undefined && wrapper.setMatchLevel(matchLevel);
-    matchTimeout !== undefined && wrapper.setMatchTimeout(matchTimeout);
-    parentBranchName !== undefined && wrapper.setParentBranchName(parentBranchName);
-    branchName !== undefined && wrapper.setBranchName(branchName);
-    proxy !== undefined && wrapper.setProxy(proxy);
-    saveFailedTests !== undefined && wrapper.setSaveFailedTests(saveFailedTests);
-    saveNewTests !== undefined && wrapper.setSaveNewTests(saveNewTests);
-    compareWithParentBranch !== undefined &&
-      wrapper.setCompareWithParentBranch(compareWithParentBranch);
-    ignoreBaseline !== undefined && wrapper.setIgnoreBaseline(ignoreBaseline);
-    serverUrl !== undefined && wrapper.setServerUrl(serverUrl);
+    configureWrapper(wrapper, Object.assign({batchInfo, config}));
   }
+}
+
+function configureWrapper(
+  wrapper,
+  {
+    isDisabled,
+    batchInfo,
+    properties,
+    baselineBranchName,
+    baselineEnvName,
+    baselineName,
+    envName,
+    ignoreCaret,
+    matchLevel,
+    matchTimeout,
+    parentBranchName,
+    branchName,
+    proxy,
+    saveFailedTests,
+    saveNewTests,
+    compareWithParentBranch,
+    ignoreBaseline,
+    serverUrl,
+  },
+) {
+  validateAndAddProperties(wrapper, properties);
+  wrapper.setBatch(batchInfo);
+
+  baselineBranchName !== undefined && wrapper.setBaselineBranchName(baselineBranchName);
+  baselineEnvName !== undefined && wrapper.setBaselineEnvName(baselineEnvName);
+  baselineName !== undefined && wrapper.setBaselineName(baselineName);
+  envName !== undefined && wrapper.setEnvName(envName);
+  ignoreCaret !== undefined && wrapper.setIgnoreCaret(ignoreCaret);
+  isDisabled !== undefined && wrapper.setIsDisabled(isDisabled);
+  matchLevel !== undefined && wrapper.setMatchLevel(matchLevel);
+  matchTimeout !== undefined && wrapper.setMatchTimeout(matchTimeout);
+  parentBranchName !== undefined && wrapper.setParentBranchName(parentBranchName);
+  branchName !== undefined && wrapper.setBranchName(branchName);
+  proxy !== undefined && wrapper.setProxy(proxy);
+  saveFailedTests !== undefined && wrapper.setSaveFailedTests(saveFailedTests);
+  saveNewTests !== undefined && wrapper.setSaveNewTests(saveNewTests);
+  compareWithParentBranch !== undefined &&
+    wrapper.setCompareWithParentBranch(compareWithParentBranch);
+  ignoreBaseline !== undefined && wrapper.setIgnoreBaseline(ignoreBaseline);
+  serverUrl !== undefined && wrapper.setServerUrl(serverUrl);
 }
 
 function openWrappers({wrappers, browsers, appName, testName}) {
@@ -76,6 +81,23 @@ function openWrappers({wrappers, browsers, appName, testName}) {
       return wrapper.open(appName, testName, viewportSize);
     }),
   );
+}
+
+function createRenderUtils({serverUrl, proxy, apiKey, logger, wrapper}) {
+  wrapper = wrapper || new EyesWrapper({apiKey, logHandler: logger.getLogHandler()});
+  configureWrapper(wrapper, {serverUrl, proxy});
+
+  const sendRenderBatch = wrapper.renderBatch.bind(wrapper);
+  const sendPutResource = wrapper.putResource.bind(wrapper);
+  const getRenderInfo = wrapper.getRenderInfo.bind(wrapper);
+  const sendGetRenderStatus = wrapper.getRenderStatus.bind(wrapper);
+
+  return {
+    sendRenderBatch,
+    sendPutResource,
+    getRenderInfo,
+    sendGetRenderStatus,
+  };
 }
 
 const apiKeyFailMsg =
@@ -90,6 +112,7 @@ module.exports = {
   initWrappers,
   configureWrappers,
   openWrappers,
+  createRenderUtils,
   apiKeyFailMsg,
   propertiesFailMsg,
   authorizationErrMsg,

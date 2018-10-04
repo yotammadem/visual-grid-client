@@ -4,25 +4,26 @@ const {expect} = require('chai');
 const makeRenderingGridClient = require('../../src/sdk/renderingGridClient');
 const createFakeWrapper = require('../util/createFakeWrapper');
 
-const apiKey = 'api key';
+const apiKey = 'apikey';
 
 describe('renderingGridClient', () => {
   it('sets a new batch', async () => {
+    const wrapper = createFakeWrapper('http://some_url');
+
     const {openEyes} = makeRenderingGridClient({
       showLogs: process.env.APPLITOOLS_SHOW_LOGS,
+      apiKey,
+      wrapper,
     });
 
-    const wrapper = createFakeWrapper('http://some_url');
     await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     const batchId = wrapper.getBatch().toJSON().id;
 
     await openEyes({
       wrappers: [wrapper],
-      apiKey,
     });
 
     const batchId2 = wrapper.getBatch().toJSON().id;

@@ -7,9 +7,9 @@ const DEFAULT_CONCURRENCY_LIMIT = 100;
  *    This is PUTIN!    *
  ************************/
 
-function makePutResources(concurrency = DEFAULT_CONCURRENCY_LIMIT) {
+function makePutResources({concurrency = DEFAULT_CONCURRENCY_LIMIT, sendPutResource}) {
   const putPromises = {};
-  return async function putResources(rGridDom, runningRender, wrapper) {
+  return async function putResources(rGridDom, runningRender) {
     const resources = []; // this will contain all the resources that need to be PUT (asked for + not already sent)
     const existingPromises = [];
     if (runningRender.getNeedMoreDom()) {
@@ -26,7 +26,7 @@ function makePutResources(concurrency = DEFAULT_CONCURRENCY_LIMIT) {
     }
 
     const newPromises = resources.map(
-      throat(concurrency, resource => doPutResource(resource, runningRender, wrapper)),
+      throat(concurrency, resource => doPutResource(resource, runningRender)),
     );
 
     return Promise.all(existingPromises.concat(newPromises));
@@ -41,8 +41,8 @@ function makePutResources(concurrency = DEFAULT_CONCURRENCY_LIMIT) {
     }
   }
 
-  function doPutResource(resource, runningRender, wrapper) {
-    const promise = wrapper.putResource(runningRender, resource);
+  function doPutResource(resource, runningRender) {
+    const promise = sendPutResource(runningRender, resource);
     putPromises[resource.getSha256Hash()] = promise;
     return promise;
   }

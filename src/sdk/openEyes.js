@@ -1,18 +1,11 @@
 'use strict';
 const makeCheckWindow = require('./checkWindow');
 const makeCloseEyes = require('./closeEyes');
-const {
-  initWrappers,
-  configureWrappers,
-  openWrappers,
-  apiKeyFailMsg,
-  authorizationErrMsg,
-} = require('./wrapperUtils');
+const {initWrappers, configureWrappers, openWrappers} = require('./wrapperUtils');
 
 function makeOpenEyes({
   appName: _appName,
   browser: _browser,
-  apiKey: _apiKey,
   saveDebugData: _saveDebugData,
   batchName: _batchName,
   batchId: _batchId,
@@ -32,22 +25,21 @@ function makeOpenEyes({
   saveNewTests: _saveNewTests,
   compareWithParentBranch: _compareWithParentBranch,
   ignoreBaseline: _ignoreBaseline,
-  serverUrl: _serverUrl,
+  serverUrl,
+  apiKey,
   logger,
   extractCssResourcesFromCdt,
   renderBatch,
   waitForRenderedStatus,
   getAllResources,
   renderThroat,
-  getRenderInfoPromise,
-  setRenderInfoPromise,
+  renderInfoPromise,
 }) {
   return async function openEyes({
     testName,
     wrappers,
     appName = _appName,
     browser = _browser,
-    apiKey = _apiKey,
     saveDebugData = _saveDebugData,
     batchName = _batchName,
     batchId = _batchId,
@@ -67,7 +59,6 @@ function makeOpenEyes({
     saveNewTests = _saveNewTests,
     compareWithParentBranch = _compareWithParentBranch,
     ignoreBaseline = _ignoreBaseline,
-    serverUrl = _serverUrl,
   }) {
     let error;
 
@@ -80,10 +71,6 @@ function makeOpenEyes({
       };
     }
 
-    if (!apiKey) {
-      throw new Error(apiKeyFailMsg);
-    }
-
     let checkWindowPromises = [];
 
     const browsers = Array.isArray(browser) ? browser : [browser];
@@ -91,8 +78,7 @@ function makeOpenEyes({
       wrappers ||
       initWrappers({count: browsers.length, apiKey, logHandler: logger.getLogHandler()});
 
-    configureWrappers({
-      wrappers,
+    configureWrappers(wrappers, {
       isDisabled,
       batchName,
       batchId,
@@ -114,20 +100,6 @@ function makeOpenEyes({
       serverUrl,
     });
 
-    const renderWrapper = wrappers[0];
-
-    const renderInfoPromise =
-      getRenderInfoPromise() ||
-      setRenderInfoPromise(
-        renderWrapper.getRenderInfo().catch(err => {
-          if (err.response && err.response.status === 401) {
-            err = new Error(authorizationErrMsg);
-          }
-
-          return err;
-        }),
-      );
-
     const [renderInfo] = await Promise.all([
       renderInfoPromise,
       openWrappers({wrappers, browsers, appName, testName}),
@@ -137,7 +109,7 @@ function makeOpenEyes({
       throw renderInfo;
     }
 
-    renderWrapper.setRenderingInfo(renderInfo);
+    const webhook = renderInfo.getResultsUrl();
 
     let stepCounter = 0;
 
@@ -148,14 +120,13 @@ function makeOpenEyes({
       renderBatch,
       waitForRenderedStatus,
       getAllResources,
-      renderInfo,
+      webhook,
       logger,
       getCheckWindowPromises,
       setCheckWindowPromises,
       browsers,
       setError,
       wrappers,
-      renderWrapper,
       renderThroat,
       stepCounter,
       testName,

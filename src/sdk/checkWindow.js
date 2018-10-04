@@ -16,14 +16,13 @@ function makeCheckWindow({
   renderBatch,
   waitForRenderedStatus,
   getAllResources,
-  renderInfo,
+  webhook,
   logger,
   getCheckWindowPromises,
   setCheckWindowPromises,
   browsers,
   setError,
   wrappers,
-  renderWrapper,
   renderThroat,
   stepCounter,
   testName,
@@ -92,9 +91,13 @@ function makeCheckWindow({
           browsers[index],
         )}`,
       );
-      const [
-        {imageLocation: screenshotUrl, domLocation, userAgent, deviceSize, selectorRegions},
-      ] = await waitForRenderedStatus([renderId], renderWrapper, getError);
+      const {
+        imageLocation: screenshotUrl,
+        domLocation,
+        userAgent,
+        deviceSize,
+        selectorRegions,
+      } = await waitForRenderedStatus(renderId, getError);
 
       if (screenshotUrl) {
         logger.log(`screenshot available for ${renderId} at ${screenshotUrl}`);
@@ -165,7 +168,7 @@ function makeCheckWindow({
         resources,
         cdt,
         browsers,
-        renderInfo,
+        webhook,
         sizeMode,
         selector,
         region,
@@ -175,7 +178,7 @@ function makeCheckWindow({
         sendDom,
       });
 
-      let renderIds = await renderThroat(() => renderBatch(renderRequests, renderWrapper));
+      let renderIds = await renderThroat(() => renderBatch(renderRequests));
       renderJobs = renderIds.map(createRenderJob);
 
       if (saveDebugData) {

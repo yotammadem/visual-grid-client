@@ -13,6 +13,7 @@ const makeOpenEyes = require('./openEyes');
 const makeWaitForTestResults = require('./waitForTestResults');
 const makeOpenEyesLimitedConcurrency = require('./openEyesLimitedConcurrency');
 const getBatch = require('./getBatch');
+const {createRenderUtils, authorizationErrMsg, apiKeyFailMsg} = require('./wrapperUtils');
 
 // TODO when supporting only Node version >= 8.6.0 then we can use ...config for all the params that are just passed on to makeOpenEyes
 function makeRenderingGridClient({
@@ -44,14 +45,18 @@ function makeRenderingGridClient({
   compareWithParentBranch,
   ignoreBaseline,
   serverUrl,
+  wrapper, // for tests
 }) {
+  if (!apiKey) {
+    throw new Error(apiKeyFailMsg);
+  }
+
   const openEyesConcurrency = Number(concurrency);
 
   if (isNaN(openEyesConcurrency)) {
     throw new Error('concurrency is not a number');
   }
 
-  let renderInfoPromise;
   const renderThroat = throatPkg(openEyesConcurrency * renderConcurrencyFactor);
   const logger = createLogger(showLogs);
   const resourceCache = createResourceCache();
@@ -59,11 +64,25 @@ function makeRenderingGridClient({
   const extractCssResources = makeExtractCssResources(logger);
   const fetchResource = makeFetchResource({logger, fetchCache});
   const extractCssResourcesFromCdt = makeExtractCssResourcesFromCdt(extractCssResources);
-  const putResources = makePutResources();
-  const renderBatch = makeRenderBatch({putResources, resourceCache, fetchCache, logger});
+  const {sendRenderBatch, sendPutResource, getRenderInfo, sendGetRenderStatus} = createRenderUtils({
+    apiKey,
+    logger,
+    serverUrl,
+    proxy,
+    wrapper,
+  });
+  const putResources = makePutResources({sendPutResource});
+  const renderBatch = makeRenderBatch({
+    putResources,
+    resourceCache,
+    fetchCache,
+    logger,
+    sendRenderBatch,
+  });
   const waitForRenderedStatus = makeWaitForRenderedStatus({
     timeout: renderStatusTimeout,
     getStatusInterval: renderStatusInterval,
+    sendGetRenderStatus,
     logger,
   });
   const getAllResources = makeGetAllResources({
@@ -74,6 +93,14 @@ function makeRenderingGridClient({
   });
 
   const {batchId: defaultBatchId, batchName: defaultBatchName} = getBatch({batchName, batchId});
+
+  const renderInfoPromise = getRenderInfo().catch(err => {
+    if (err.response && err.response.status === 401) {
+      err = new Error(authorizationErrMsg);
+    }
+
+    return err;
+  });
 
   const openEyes = makeOpenEyes({
     appName,
@@ -105,8 +132,7 @@ function makeRenderingGridClient({
     waitForRenderedStatus,
     getAllResources,
     renderThroat,
-    getRenderInfoPromise,
-    setRenderInfoPromise,
+    renderInfoPromise,
   });
   const openEyesLimitedConcurrency = makeOpenEyesLimitedConcurrency(openEyes, openEyesConcurrency);
   const waitForTestResults = makeWaitForTestResults({logger});
@@ -115,15 +141,6 @@ function makeRenderingGridClient({
     openEyes: openEyesLimitedConcurrency,
     waitForTestResults,
   };
-
-  function getRenderInfoPromise() {
-    return renderInfoPromise;
-  }
-
-  function setRenderInfoPromise(promise) {
-    renderInfoPromise = promise;
-    return promise;
-  }
 }
 
 module.exports = makeRenderingGridClient;

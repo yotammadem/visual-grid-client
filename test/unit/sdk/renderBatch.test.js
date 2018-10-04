@@ -8,9 +8,10 @@ const FakeRenderRequest = require('../../util/FakeRenderRequest');
 const createResourceCache = require('../../../src/sdk/createResourceCache');
 const testLogger = require('../../util/testLogger');
 
-function createFakeWrapper() {
+function getFuncs() {
+  const resourcesPutted = [];
   return {
-    async renderBatch(renderRequests) {
+    async sendRenderBatch(renderRequests) {
       return renderRequests.map((renderRequest, i) => {
         const renderId = renderRequest.getRenderId();
         return new FakeRunningRender(
@@ -20,20 +21,20 @@ function createFakeWrapper() {
       });
     },
     async putResources(dom, runningRender) {
-      this.resourcesPutted.push({dom, renderId: runningRender.getRenderId()});
+      resourcesPutted.push({dom, renderId: runningRender.getRenderId()});
     },
-    resourcesPutted: [],
+    resourcesPutted,
   };
 }
 
-function putResources(rGridDom, runningRender, wrapper) {
-  return wrapper.putResources(rGridDom, runningRender);
-}
-
 describe('renderBatch', () => {
-  let resourceCache, renderBatch, fetchCache;
+  let resourceCache, renderBatch, fetchCache, resourcesPutted, putResources;
 
   beforeEach(() => {
+    const funcs = getFuncs();
+    const {sendRenderBatch} = funcs;
+    putResources = funcs.putResources;
+    resourcesPutted = funcs.resourcesPutted;
     resourceCache = createResourceCache();
     fetchCache = createResourceCache();
     renderBatch = makeRenderBatch({
@@ -41,6 +42,7 @@ describe('renderBatch', () => {
       resourceCache,
       fetchCache,
       logger: testLogger,
+      sendRenderBatch,
     });
   });
 
@@ -80,9 +82,7 @@ describe('renderBatch', () => {
       ]),
     ];
 
-    const wrapper = createFakeWrapper();
-
-    const renderIds = await renderBatch(renderRequests, wrapper);
+    const renderIds = await renderBatch(renderRequests);
     expect(renderIds).to.eql(['id1', 'id2', 'id3']);
 
     expect(renderRequests.map(renderRequest => renderRequest.getRenderId())).to.eql([
@@ -91,7 +91,7 @@ describe('renderBatch', () => {
       'id3',
     ]);
 
-    expect(wrapper.resourcesPutted).to.eql([
+    expect(resourcesPutted).to.eql([
       {dom: 'dom1', renderId: 'id1'},
       {dom: 'dom2', renderId: 'id2'},
       {dom: 'dom3', renderId: 'id3'},
@@ -113,18 +113,17 @@ describe('renderBatch', () => {
   });
 
   it('throws an error if need-more-resources is received on second render request', async () => {
-    // a wrapper that always returns need-more-resources
-    const wrapper = {
-      async renderBatch() {
+    const renderBatch = makeRenderBatch({
+      putResources,
+      resourceCache,
+      fetchCache,
+      logger: testLogger,
+      sendRenderBatch: async () => {
+        // always returns need-more-resources
         return [new FakeRunningRender('some id', RenderStatus.NEED_MORE_RESOURCES)];
       },
-
-      async putResources() {},
-    };
-    const error = await renderBatch([new FakeRenderRequest('some dom')], wrapper).then(
-      x => x,
-      err => err,
-    );
+    });
+    const error = await renderBatch([new FakeRenderRequest('some dom')]).then(x => x, err => err);
 
     expect(error).to.be.an.instanceof(Error);
   });

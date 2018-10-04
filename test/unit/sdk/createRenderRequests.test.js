@@ -17,13 +17,13 @@ describe('createRenderRequests', () => {
     const region = {left: 1, top: 2, width: 3, height: 4};
     const scriptHooks = 'scriptHooks';
     const sendDom = 'sendDom';
-    const renderInfo = {getResultsUrl: () => 'resultsUrl'};
+    const webhook = 'resultsUrl';
     const renderRequests = createRenderRequests({
       url,
       resources,
       cdt,
       browsers,
-      renderInfo,
+      webhook,
       sizeMode,
       selector,
       region,
@@ -39,7 +39,7 @@ describe('createRenderRequests', () => {
 
     expect(renderRequests.map(r => r.toJSON())).to.eql([
       {
-        webhook: 'resultsUrl',
+        webhook,
         url,
         dom,
         resources: resourcesObj,
@@ -55,7 +55,7 @@ describe('createRenderRequests', () => {
         },
       },
       {
-        webhook: 'resultsUrl',
+        webhook,
         url,
         dom,
         resources: resourcesObj,
@@ -80,13 +80,13 @@ describe('createRenderRequests', () => {
     const deviceName = 'deviceName';
     const screenOrientation = 'screenOrientation';
     const browsers = [{deviceName, screenOrientation}];
-    const renderInfo = {getResultsUrl: () => 'resultsUrl'};
+    const webhook = 'resultsUrl';
     const renderRequests = createRenderRequests({
       url,
       resources,
       cdt,
       browsers,
-      renderInfo,
+      webhook,
     });
 
     const dom = {
@@ -96,7 +96,7 @@ describe('createRenderRequests', () => {
 
     expect(renderRequests.map(r => r.toJSON())).to.eql([
       {
-        webhook: 'resultsUrl',
+        webhook,
         url,
         dom,
         resources: {},
@@ -117,13 +117,13 @@ describe('createRenderRequests', () => {
     const cdt = 'cdt';
     const resources = [];
     const browsers = [{width: 1, height: 2, deviceScaleFactor: 3}];
-    const renderInfo = {getResultsUrl: () => 'resultsUrl'};
+    const webhook = 'resultsUrl';
     const renderRequests = createRenderRequests({
       url,
       resources,
       cdt,
       browsers,
-      renderInfo,
+      webhook,
     });
 
     const dom = {
@@ -160,7 +160,7 @@ describe('createRenderRequests', () => {
     const cdt = '';
     const resources = [];
     const browsers = [{width: 1, height: 2}];
-    const renderInfo = {getResultsUrl: () => 'resultsUrl'};
+    const webhook = 'resultsUrl';
     const ignore = ['kuku', {selector: 'bla'}];
     const floating = [{some: 'thing'}, {selector: 'sel'}];
     const renderRequests = createRenderRequests({
@@ -168,7 +168,7 @@ describe('createRenderRequests', () => {
       resources,
       cdt,
       browsers,
-      renderInfo,
+      webhook,
       ignore,
       floating,
     });
@@ -180,7 +180,7 @@ describe('createRenderRequests', () => {
 
     expect(renderRequests.map(r => r.toJSON())).to.eql([
       {
-        webhook: 'resultsUrl',
+        webhook,
         url,
         dom,
         resources: {},

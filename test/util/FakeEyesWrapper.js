@@ -15,6 +15,8 @@ function compare(o1, o2) {
   return JSON.stringify(o1) === JSON.stringify(o2);
 }
 
+let salt = 0;
+
 const devices = {
   'iPhone 4': {width: 320, height: 480},
 };
@@ -83,6 +85,7 @@ class FakeEyesWrapper {
       sizeMode,
       emulationInfo,
       selectorsToFindRegionsFor,
+      salt: ++salt,
     });
 
     return new FakeRunningRender(renderId, RenderStatus.RENDERED);
@@ -255,6 +258,8 @@ class FakeEyesWrapper {
   setViewportSize(value) {
     this.viewportSize = value;
   }
+
+  putResource() {}
 }
 
 module.exports = FakeEyesWrapper;

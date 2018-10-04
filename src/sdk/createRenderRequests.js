@@ -10,7 +10,7 @@ function createRenderRequests({
   resources,
   cdt,
   browsers,
-  renderInfo,
+  webhook,
   sizeMode,
   selector,
   region,
@@ -39,7 +39,7 @@ function createRenderRequests({
       });
 
       return new RenderRequest(
-        renderInfo.getResultsUrl(),
+        webhook,
         url,
         rGridDom,
         RenderInfo.fromObject({width, height, sizeMode, selector, region, emulationInfo}),
