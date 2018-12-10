@@ -1,5 +1,6 @@
+/* global fetch */
 'use strict';
-const fetch = require('node-fetch');
+require('isomorphic-fetch');
 const {retryFetch} = require('@applitools/http-commons');
 const createResourceCache = require('./createResourceCache');
 

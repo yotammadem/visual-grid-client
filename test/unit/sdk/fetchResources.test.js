@@ -5,7 +5,7 @@ const nock = require('nock');
 const makeFetchResource = require('../../../src/sdk/fetchResource');
 const testLogger = require('../../util/testLogger');
 const psetTimeout = require('util').promisify(setTimeout);
-const {FetchError} = require('node-fetch');
+const FetchError = require('isomorphic-fetch/node_modules/node-fetch/lib/fetch-error');
 const createResourceCache = require('../../../src/sdk/createResourceCache');
 
 describe('fetchResource', () => {
