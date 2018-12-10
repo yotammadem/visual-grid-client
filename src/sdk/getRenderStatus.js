@@ -45,13 +45,12 @@ function makeGetRenderStatus({logger, doGetRenderStatus, getStatusInterval = 500
       for (const renderId of renderIds) {
         pendingRendersForJob[renderId].reject(err);
       }
-      return;
+    } else {
+      renderStatuses.forEach((rs, i) => {
+        const renderId = renderIds[i];
+        pendingRendersForJob[renderId].resolve(rs);
+      });
     }
-
-    renderStatuses.forEach((rs, i) => {
-      const renderId = renderIds[i];
-      pendingRendersForJob[renderId].resolve(rs);
-    });
 
     await psetTimeout(getStatusInterval);
     getRenderStatusJob();
