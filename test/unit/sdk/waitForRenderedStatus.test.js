@@ -106,8 +106,40 @@ describe('waitForRenderedStatus', () => {
         return expectedStatus;
       },
     });
-    const [err, _statuses] = await presult(waitForRenderedStatus('render1'));
+    const [err, _status] = await presult(waitForRenderedStatus('render1'));
     expect(err).to.be.an.instanceOf(Error);
     expect(err.message).to.equal(failMsg);
+  });
+
+  it('keeps polling on undefined render status', async () => {
+    let counter = 0;
+
+    const waitForRenderedStatus = makeWaitForRenderedStatus({
+      logger: testLogger,
+      getRenderStatus: async () => {
+        counter++;
+        await psetTimeout(100);
+        if (counter < 3) {
+          return new RenderStatusResults();
+        } else {
+          return new RenderStatusResults({status: RenderStatus.RENDERED});
+        }
+      },
+    });
+
+    const notYetPromise = Promise.race([
+      presult(
+        waitForRenderedStatus('render1').then(status => {
+          expect(status).to.eql(new RenderStatusResults({status: RenderStatus.RENDERED}));
+        }),
+      ),
+      psetTimeout(150).then(() => 'not yet'),
+    ]);
+    expect(counter).to.equal(1);
+    await psetTimeout(150);
+    expect(counter).to.equal(2);
+    await psetTimeout(100);
+    expect(counter).to.equal(3);
+    expect(await notYetPromise).to.equal('not yet');
   });
 });

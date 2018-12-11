@@ -26,7 +26,10 @@ describe('getRenderStatus', () => {
     if (renderIds.includes('error')) {
       throw new Error('fail');
     } else {
-      return renderIds.map(renderId => new RenderStatusResults({status: renderId}));
+      return renderIds.map(
+        renderId =>
+          new RenderStatusResults({status: renderId === 'undefined' ? undefined : renderId}),
+      );
     }
   }
 
@@ -110,5 +113,21 @@ describe('getRenderStatus', () => {
     expect(err2.message).to.equal('fail');
     expect(calls).to.eql([['bla1', 'error'], ['bla3']]);
     expect(rs3).to.eql(new RenderStatusResults({status: renderId3}));
+  });
+
+  it('handles undefined render status', async () => {
+    const renderId1 = 'bla1';
+    const renderId2 = undefined;
+    const promise1 = getRenderStatus(renderId1);
+    const promise2 = getRenderStatus(renderId2);
+
+    await psetTimeout(150);
+
+    const rs1 = await promise1;
+    const rs2 = await promise2;
+
+    expect(rs1).to.eql(new RenderStatusResults({status: renderId1}));
+    expect(rs2).to.eql(new RenderStatusResults());
+    expect(calls).to.eql([['bla1', 'undefined']]); // 'undefined' and not undefined because when undefined becomes a key in pendingRenders it is transformed to 'undefined'
   });
 });
