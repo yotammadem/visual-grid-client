@@ -66,6 +66,9 @@ typings/
 
 .applitools
 
+# IDEs
 .idea/
 
+# Test App
 test/fixtures/test-app/dist/
+test/fixtures/test-app/package-lock.json
