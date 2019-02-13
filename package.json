@@ -13,6 +13,7 @@
   "scripts": {
     "build:browser": "cd test/fixtures/test-app && npm i && npm run build",
     "test:mocha": "mocha --no-timeouts 'test/**/*.test.js'",
+    "test:fast": "mocha --no-timeouts 'test/!(browser||e2e)/**/*.test.js'",
     "test:unit": "mocha --no-timeouts 'test/unit/**/*.test.js'",
     "test:it": "mocha --no-timeouts 'test/it/**/*.test.js'",
     "test:e2e": "mocha --no-timeouts 'test/e2e/**/*.test.js'",

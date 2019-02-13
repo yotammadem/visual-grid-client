@@ -6,7 +6,7 @@ const createCheckSettings = require('./createCheckSettings');
 
 const {presult} = require('@applitools/functional-commons');
 const {RectangleSize, Location} = require('@applitools/eyes-sdk-core');
-const calculateIgnoreAndFloatingRegions = require('./calculateIgnoreAndFloatingRegions');
+const calculateMatchRegions = require('./calculateMatchRegions');
 
 function makeCheckWindow({
   getError,
@@ -42,6 +42,8 @@ function makeCheckWindow({
     floating,
     sendDom = true,
     matchLevel = _matchLevel,
+    layout,
+    strict,
   }) {
     const currStepCount = ++stepCounter;
     logger.log(`running checkWindow for test ${testName} step #${currStepCount}`);
@@ -56,6 +58,17 @@ function makeCheckWindow({
       url,
       frames,
     });
+
+    const noOffsetSelectors = {
+      all: [ignore, layout, strict],
+      ignore: 0,
+      layout: 1,
+      strict: 2,
+    };
+    const offsetSelectors = {
+      all: [floating],
+      floating: 0,
+    };
     const renderPromise = presult(startRender());
 
     let renderJobs; // This will be an array of `resolve` functions to rendering jobs. See `createRenderJob` below.
@@ -151,14 +164,19 @@ function makeCheckWindow({
         ? new Location({x: imageLocationRegion.getLeft(), y: imageLocationRegion.getTop()})
         : undefined;
 
-      const {ignoreRegions, floatingRegions} = calculateIgnoreAndFloatingRegions({
-        ignore,
-        floating,
+      const {noOffsetRegions, offsetRegions} = calculateMatchRegions({
+        noOffsetSelectors: noOffsetSelectors.all,
+        offsetSelectors: offsetSelectors.all,
         selectorRegions,
         imageLocationRegion,
       });
 
-      const checkSettings = createCheckSettings({ignore: ignoreRegions, floating: floatingRegions});
+      const checkSettings = createCheckSettings({
+        ignore: noOffsetRegions[noOffsetSelectors.ignore],
+        floating: offsetRegions[offsetSelectors.floating],
+        layout: noOffsetRegions[noOffsetSelectors.layout],
+        strict: noOffsetRegions[noOffsetSelectors.strict],
+      });
 
       logger.log(`checkWindow waiting for openEyes. test=${testName}, stepCount #${currStepCount}`);
 
@@ -208,8 +226,8 @@ function makeCheckWindow({
         selector,
         region,
         scriptHooks,
-        ignore,
-        floating,
+        noOffsetSelectors: noOffsetSelectors.all,
+        offsetSelectors: offsetSelectors.all,
         sendDom,
       });
 

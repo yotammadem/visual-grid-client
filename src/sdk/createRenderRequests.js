@@ -14,15 +14,15 @@ function createRenderRequests({
   selector,
   region,
   scriptHooks,
-  ignore,
-  floating,
+  noOffsetSelectors,
+  offsetSelectors,
   sendDom,
 }) {
   const selectorsToFindRegionsFor = calculateSelectorsToFindRegionsFor({
     sizeMode,
     selector,
-    ignore,
-    floating,
+    noOffsetSelectors,
+    offsetSelectors,
   });
 
   return browsers.map(

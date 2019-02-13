@@ -1,27 +1,27 @@
 'use strict';
 
-function calculateIgnoreAndFloatingRegions({
-  ignore,
-  floating,
+function calculateMatchRegions({
+  noOffsetSelectors,
+  offsetSelectors,
   selectorRegions,
   imageLocationRegion,
 }) {
   let selectorRegionIndex = imageLocationRegion ? 1 : 0;
-  const ignoreRegions = mapIgnoreAndFloatingToRegions(ignore);
-  const floatingRegions = mapIgnoreAndFloatingToRegions(floating, true);
+  const noOffsetRegions = noOffsetSelectors.map(selection => mapSelectionToRegions(selection));
+  const offsetRegions = offsetSelectors.map(selection => mapSelectionToRegions(selection, true));
 
   return {
-    ignoreRegions,
-    floatingRegions,
+    noOffsetRegions,
+    offsetRegions,
   };
 
-  function mapIgnoreAndFloatingToRegions(ignoreOrFloating, addOffset) {
+  function mapSelectionToRegions(selection, addOffset) {
     const selectorObjToRegionWithOffset = selectorObjToRegion.bind(null, addOffset);
-    return ignoreOrFloating
-      ? Array.isArray(ignoreOrFloating)
-        ? ignoreOrFloating.map(selectorObjToRegionWithOffset)
-        : selectorObjToRegionWithOffset(ignoreOrFloating)
-      : ignoreOrFloating;
+    return selection
+      ? Array.isArray(selection)
+        ? selection.map(selectorObjToRegionWithOffset)
+        : selectorObjToRegionWithOffset(selection)
+      : selection;
   }
 
   function selectorObjToRegion(addOffset, selectorObj) {
@@ -52,4 +52,4 @@ function calculateIgnoreAndFloatingRegions({
   }
 }
 
-module.exports = calculateIgnoreAndFloatingRegions;
+module.exports = calculateMatchRegions;

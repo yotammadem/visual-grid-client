@@ -64,6 +64,8 @@ defined in the `browser` property of the configuraion.
   This is an object with `x`, `y`, `width`, `height` properties.
 * `ignore`: TBD
 * `floating`: TBD
+* `strict`: TBD
+* `layout`: TBD
 * `sendDom`: TBD
 * `scriptHooks`: a set of scripts to be run by the browser during the rendering.
    An object with the following properties:

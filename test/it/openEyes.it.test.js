@@ -1170,7 +1170,32 @@ describe('openEyes', () => {
     ]);
   });
 
-  it('handles ignore regions with selector', async () => {
+  it('handles layout and strict regions', async () => {
+    const {checkWindow, close} = await openEyes({
+      wrappers: [wrapper],
+      appName,
+    });
+
+    const regionLayout = {left: 1, top: 2, width: 3, height: 4};
+    const regionStrict = {left: 10, top: 20, width: 30, height: 40};
+    checkWindow({
+      url: '',
+      // resourceUrls: [],
+      cdt: [],
+      layout: [regionLayout],
+      strict: [regionStrict],
+    });
+    const [results] = await close();
+    expect(results[0].getAsExpected()).to.equal(true);
+    expect(results[0].__checkSettings.getLayoutRegions()).to.eql([
+      new IgnoreRegionByRectangle(new Region(regionLayout)),
+    ]);
+    expect(results[0].__checkSettings.getStrictRegions()).to.eql([
+      new IgnoreRegionByRectangle(new Region(regionStrict)),
+    ]);
+  });
+
+  it('handles ignore, layout and strict regions with selector', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
       appName,
@@ -1185,8 +1210,26 @@ describe('openEyes', () => {
       height: region1FromStatusResults.height,
     });
 
-    const ignoreSelector2 = {selector: 'sel2'};
-    const region2FromStatusResults = FakeEyesWrapper.selectorsToLocations['sel2'];
+    const layoutSelector1 = {selector: 'sel2'};
+    const regionLayout1FromStatusResults = FakeEyesWrapper.selectorsToLocations['sel2'];
+    const regionLayout1 = new Region({
+      left: regionLayout1FromStatusResults.x,
+      top: regionLayout1FromStatusResults.y,
+      width: regionLayout1FromStatusResults.width,
+      height: regionLayout1FromStatusResults.height,
+    });
+
+    const strictSelector1 = {selector: 'sel3'};
+    const regionStrict1FromStatusResults = FakeEyesWrapper.selectorsToLocations['sel3'];
+    const regionStrict1 = new Region({
+      left: regionStrict1FromStatusResults.x,
+      top: regionStrict1FromStatusResults.y,
+      width: regionStrict1FromStatusResults.width,
+      height: regionStrict1FromStatusResults.height,
+    });
+
+    const ignoreSelector2 = {selector: 'sel4'};
+    const region2FromStatusResults = FakeEyesWrapper.selectorsToLocations['sel4'];
     const region2 = new Region({
       left: region2FromStatusResults.x,
       top: region2FromStatusResults.y,
@@ -1194,11 +1237,31 @@ describe('openEyes', () => {
       height: region2FromStatusResults.height,
     });
 
+    const layoutSelector2 = {selector: 'sel5'};
+    const regionLayout2FromStatusResults = FakeEyesWrapper.selectorsToLocations['sel5'];
+    const regionLayout2 = new Region({
+      left: regionLayout2FromStatusResults.x,
+      top: regionLayout2FromStatusResults.y,
+      width: regionLayout2FromStatusResults.width,
+      height: regionLayout2FromStatusResults.height,
+    });
+
+    const strictSelector2 = {selector: 'sel6'};
+    const regionStrict2FromStatusResults = FakeEyesWrapper.selectorsToLocations['sel6'];
+    const regionStrict2 = new Region({
+      left: regionStrict2FromStatusResults.x,
+      top: regionStrict2FromStatusResults.y,
+      width: regionStrict2FromStatusResults.width,
+      height: regionStrict2FromStatusResults.height,
+    });
+
     checkWindow({
       url: '',
       // resourceUrls: [],
       cdt: [],
       ignore: [ignoreSelector1, ignoreSelector2],
+      layout: [layoutSelector1, layoutSelector2],
+      strict: [strictSelector1, strictSelector2],
     });
     const [results] = await close();
     expect(results[0].getAsExpected()).to.equal(true);
@@ -1206,18 +1269,32 @@ describe('openEyes', () => {
       new IgnoreRegionByRectangle(region1),
       new IgnoreRegionByRectangle(region2),
     ]);
+    expect(results[0].__checkSettings.getLayoutRegions()).to.eql([
+      new IgnoreRegionByRectangle(regionLayout1),
+      new IgnoreRegionByRectangle(regionLayout2),
+    ]);
+    expect(results[0].__checkSettings.getStrictRegions()).to.eql([
+      new IgnoreRegionByRectangle(regionStrict1),
+      new IgnoreRegionByRectangle(regionStrict2),
+    ]);
   });
 
-  it('handles ignore regions with selector, when sizeMode===selector', async () => {
+  it('handles ignore, layout and strict regions with selector, when sizeMode===selector', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
       appName,
     });
     const selector = 'sel1';
     const ignoreRegion = {left: 1, top: 2, width: 3, height: 4};
+    const layoutRegion = {left: 10, top: 20, width: 30, height: 40};
+    const strictRegion = {left: 100, top: 200, width: 300, height: 400};
     const ignoreSelector = {selector: 'sel2'};
+    const layoutSelector = {selector: 'sel1'};
+    const strictSelector = {selector: 'sel3'};
     const imageOffset = FakeEyesWrapper.selectorsToLocations[selector];
-    const expectedSelectorRegion = FakeEyesWrapper.selectorsToLocations['sel2'];
+    const expectedIgnoreSelectorRegion = FakeEyesWrapper.selectorsToLocations['sel2'];
+    const expectedLayoutSelectorRegion = FakeEyesWrapper.selectorsToLocations['sel1'];
+    const expectedStrictSelectorRegion = FakeEyesWrapper.selectorsToLocations['sel3'];
     checkWindow({
       url: '',
       // resourceUrls: [],
@@ -1225,32 +1302,63 @@ describe('openEyes', () => {
       sizeMode: 'selector',
       selector,
       ignore: [ignoreRegion, ignoreSelector],
+      layout: [layoutRegion, layoutSelector],
+      strict: [strictRegion, strictSelector],
     });
+
     const [results] = await close();
     expect(results[0].getAsExpected()).to.equal(true);
     expect(results[0].__checkSettings.getIgnoreRegions()).to.eql([
       new IgnoreRegionByRectangle(new Region(ignoreRegion)),
       new IgnoreRegionByRectangle(
         new Region({
-          left: expectedSelectorRegion.x - imageOffset.x,
-          top: expectedSelectorRegion.y - imageOffset.y,
-          width: expectedSelectorRegion.width,
-          height: expectedSelectorRegion.height,
+          left: expectedIgnoreSelectorRegion.x - imageOffset.x,
+          top: expectedIgnoreSelectorRegion.y - imageOffset.y,
+          width: expectedIgnoreSelectorRegion.width,
+          height: expectedIgnoreSelectorRegion.height,
+        }),
+      ),
+    ]);
+    expect(results[0].__checkSettings.getLayoutRegions()).to.eql([
+      new IgnoreRegionByRectangle(new Region(layoutRegion)),
+      new IgnoreRegionByRectangle(
+        new Region({
+          left: expectedLayoutSelectorRegion.x - imageOffset.x,
+          top: expectedLayoutSelectorRegion.y - imageOffset.y,
+          width: expectedLayoutSelectorRegion.width,
+          height: expectedLayoutSelectorRegion.height,
+        }),
+      ),
+    ]);
+    expect(results[0].__checkSettings.getStrictRegions()).to.eql([
+      new IgnoreRegionByRectangle(new Region(strictRegion)),
+      new IgnoreRegionByRectangle(
+        new Region({
+          left: expectedStrictSelectorRegion.x - imageOffset.x,
+          top: expectedStrictSelectorRegion.y - imageOffset.y,
+          width: expectedStrictSelectorRegion.width,
+          height: expectedStrictSelectorRegion.height,
         }),
       ),
     ]);
   });
 
-  it('handles ignore regions with selector and floating regions with selector, when sizeMode===selector', async () => {
+  it('handles ignore, layout and strict regions with selector and floating regions with selector, when sizeMode===selector', async () => {
     const {checkWindow, close} = await openEyes({
       wrappers: [wrapper],
       appName,
     });
     const selector = 'sel1';
     const ignoreRegion = {left: 1, top: 2, width: 3, height: 4};
+    const layoutRegion = {left: 10, top: 20, width: 30, height: 40};
+    const strictRegion = {left: 100, top: 200, width: 300, height: 400};
     const ignoreSelector = {selector: 'sel2'};
+    const layoutSelector = {selector: 'sel1'};
+    const strictSelector = {selector: 'sel3'};
     const imageOffset = FakeEyesWrapper.selectorsToLocations[selector];
-    const expectedSelectorRegion = FakeEyesWrapper.selectorsToLocations['sel2'];
+    const expectedIgnoreSelectorRegion = FakeEyesWrapper.selectorsToLocations['sel2'];
+    const expectedLayoutSelectorRegion = FakeEyesWrapper.selectorsToLocations['sel1'];
+    const expectedStrictSelectorRegion = FakeEyesWrapper.selectorsToLocations['sel3'];
 
     const floatingRegion = {
       left: 10,
@@ -1279,6 +1387,8 @@ describe('openEyes', () => {
       sizeMode: 'selector',
       selector,
       ignore: [ignoreRegion, ignoreSelector],
+      layout: [layoutRegion, layoutSelector],
+      strict: [strictRegion, strictSelector],
       floating: [floatingRegion, floatingSelector],
     });
 
@@ -1289,13 +1399,36 @@ describe('openEyes', () => {
       new IgnoreRegionByRectangle(new Region(ignoreRegion)),
       new IgnoreRegionByRectangle(
         new Region({
-          left: expectedSelectorRegion.x - imageOffset.x,
-          top: expectedSelectorRegion.y - imageOffset.y,
-          width: expectedSelectorRegion.width,
-          height: expectedSelectorRegion.height,
+          left: expectedIgnoreSelectorRegion.x - imageOffset.x,
+          top: expectedIgnoreSelectorRegion.y - imageOffset.y,
+          width: expectedIgnoreSelectorRegion.width,
+          height: expectedIgnoreSelectorRegion.height,
         }),
       ),
     ]);
+    expect(results[0].__checkSettings.getLayoutRegions()).to.eql([
+      new IgnoreRegionByRectangle(new Region(layoutRegion)),
+      new IgnoreRegionByRectangle(
+        new Region({
+          left: expectedLayoutSelectorRegion.x - imageOffset.x,
+          top: expectedLayoutSelectorRegion.y - imageOffset.y,
+          width: expectedLayoutSelectorRegion.width,
+          height: expectedLayoutSelectorRegion.height,
+        }),
+      ),
+    ]);
+    expect(results[0].__checkSettings.getStrictRegions()).to.eql([
+      new IgnoreRegionByRectangle(new Region(strictRegion)),
+      new IgnoreRegionByRectangle(
+        new Region({
+          left: expectedStrictSelectorRegion.x - imageOffset.x,
+          top: expectedStrictSelectorRegion.y - imageOffset.y,
+          width: expectedStrictSelectorRegion.width,
+          height: expectedStrictSelectorRegion.height,
+        }),
+      ),
+    ]);
+
     expect(results[0].__checkSettings.getFloatingRegions()).to.eql([
       new FloatingRegionByRectangle(
         new Region(floatingRegion),

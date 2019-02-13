@@ -1,13 +1,23 @@
 'use strict';
 
-function calculateSelectorsToFindRegionsFor({sizeMode, selector, ignore, floating}) {
+function calculateSelectorsToFindRegionsFor({
+  sizeMode,
+  selector,
+  noOffsetSelectors,
+  offsetSelectors,
+}) {
   let selectorsToFindRegionsFor = sizeMode === 'selector' ? [selector] : undefined;
-  if (!ignore && !floating) return selectorsToFindRegionsFor;
+  if (noOffsetSelectors.every(s => !s) && offsetSelectors.every(s => !s)) {
+    return selectorsToFindRegionsFor;
+  }
 
-  const ignoreArr = ignore ? [].concat(ignore) : [];
-  const floatingArr = floating ? [].concat(floating) : [];
-  const ignoreAndFloating = ignoreArr.concat(floatingArr);
-  const selectors = ignoreAndFloating
+  const noOffsetCombined = noOffsetSelectors.reduce(
+    (combined, arr) => combined.concat(arr || []),
+    [],
+  );
+  const offsetCombined = offsetSelectors.reduce((combined, arr) => combined.concat(arr || []), []);
+  const selectors = noOffsetCombined
+    .concat(offsetCombined)
     .filter(region => region.selector)
     .map(({selector}) => selector);
 

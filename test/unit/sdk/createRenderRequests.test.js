@@ -30,6 +30,8 @@ describe('createRenderRequests', () => {
       region,
       scriptHooks,
       sendDom,
+      noOffsetSelectors: [],
+      offsetSelectors: [],
     });
 
     const resourcesObj = {url1: 'hash1', url2: 'hash2'};
@@ -88,6 +90,8 @@ describe('createRenderRequests', () => {
       dom: createRGridDom({resources: {}, cdt}),
       browsers,
       renderInfo,
+      noOffsetSelectors: [],
+      offsetSelectors: [],
     });
 
     const dom = {
@@ -125,6 +129,8 @@ describe('createRenderRequests', () => {
       dom: createRGridDom({resources: {}, cdt}),
       browsers,
       renderInfo,
+      noOffsetSelectors: [],
+      offsetSelectors: [],
     });
 
     const dom = {
@@ -156,13 +162,15 @@ describe('createRenderRequests', () => {
     ]);
   });
 
-  it('handles ignore and floating regions', () => {
+  it('handles ignore, layout, strict and floating regions', () => {
     const url = 'url';
     const cdt = '';
     const resources = [];
     const browsers = [{width: 1, height: 2}];
     const renderInfo = {getResultsUrl: () => 'resultsUrl'};
     const ignore = ['kuku', {selector: 'bla'}];
+    const layout = [{selector: 'bla2'}, 'kuku2'];
+    const strict = ['kuku3', {selector: 'bla3'}, {selector: 'bla4'}];
     const floating = [{some: 'thing'}, {selector: 'sel'}];
     const renderRequests = createRenderRequests({
       url,
@@ -170,8 +178,8 @@ describe('createRenderRequests', () => {
       dom: createRGridDom({resources: {}, cdt}),
       browsers,
       renderInfo,
-      ignore,
-      floating,
+      noOffsetSelectors: [ignore, layout, strict],
+      offsetSelectors: [floating],
     });
 
     const dom = {
@@ -192,7 +200,7 @@ describe('createRenderRequests', () => {
           region: undefined,
           sizeMode: undefined,
         },
-        selectorsToFindRegionsFor: ['bla', 'sel'],
+        selectorsToFindRegionsFor: ['bla', 'bla2', 'bla3', 'bla4', 'sel'],
       },
     ]);
   });
