@@ -1,4 +1,15 @@
 
+v10.0.9 / 2019-02-13
+====================
+
+* 10.0.9 [[271feda](https://github.com/applitools/eyes.storybook/commit/271fedaf5abf07bea4b974ef184ebac248056787)]
+* updated gitignore to include test app lock file [[1a1834c](https://github.com/applitools/eyes.storybook/commit/1a1834c1aa5b8a9c6b19d9fcdaba55519edf1a03)]
+* Added layout & strict support for regions (via css selectors or position). [[928f3da](https://github.com/applitools/eyes.storybook/commit/928f3da56a9ee665501d5b256834c75ecafb0c44)]
+* 10.0.8 [[3a279a6](https://github.com/applitools/eyes.storybook/commit/3a279a6be35afac7b6bb1a03ccf7aee2292ada97)]
+* update cssom to 0.3.6 - move from github to npm [[fb8957c](https://github.com/applitools/eyes.storybook/commit/fb8957c7e3aacc8041937bbedec1cebc7ce00fa4)]
+* render script should handle failure in close [[e1da412](https://github.com/applitools/eyes.storybook/commit/e1da4122d93707580b2c5779dc959bbfa7f9ea08)]
+* changelog [[60a7471](https://github.com/applitools/eyes.storybook/commit/60a747127d9a1ae7d37a99e719cac706941b8a28)]
+
 v10.0.7 / 2019-02-10
 ====================
 
