@@ -9,7 +9,7 @@ function createRenderRequests({
   resources,
   dom,
   browsers,
-  renderInfo,
+  webhook,
   sizeMode,
   selector,
   region,
@@ -37,7 +37,7 @@ function createRenderRequests({
       });
 
       return new RenderRequest({
-        webhook: renderInfo.getResultsUrl(),
+        webhook,
         url,
         resources,
         dom,

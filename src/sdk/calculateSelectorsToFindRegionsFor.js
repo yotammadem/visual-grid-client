@@ -3,8 +3,8 @@
 function calculateSelectorsToFindRegionsFor({
   sizeMode,
   selector,
-  noOffsetSelectors,
-  offsetSelectors,
+  noOffsetSelectors = [],
+  offsetSelectors = [],
 }) {
   let selectorsToFindRegionsFor = sizeMode === 'selector' ? [selector] : undefined;
   if (noOffsetSelectors.every(s => !s) && offsetSelectors.every(s => !s)) {
