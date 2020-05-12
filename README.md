@@ -136,7 +136,7 @@ Example [Mocha](https://www.npmjs.com/package/mocha) test that uses the visual g
 const path = require('path')
 const fs = require('fs')
 const {makeVisualGridClient} = require('@applitools/visual-grid-client')
-const {getProcessPageAndSerializeScript} = require('@applitools/dom-snapshot')
+const {getProcessPageAndSerialize} = require('@applitools/dom-snapshot')
 const puppeteer = require('puppeteer')
 
 describe('visual-grid-client test', function() {
@@ -154,7 +154,7 @@ describe('visual-grid-client test', function() {
       showLogs: true,
     })
 
-    processPageAndSerialize = `(${await getProcessPageAndSerializeScript()})()`
+    processPageAndSerialize = `(${await getProcessPageAndSerialize()})()`
   })
 
   after(() => {
